@@ -1,0 +1,5 @@
+# ver el caso de que se tenga un builtin por referencia object x = builtin, en este
+# solo cambiar el begin, un
+# if para crear el nodo, para eso ver el tipo estatico de la expresion del nodo
+# asignacion en cool, si es builtin ya eso hay que tratarlo de forma especial, hay
+# que ponerle el begin del builtin

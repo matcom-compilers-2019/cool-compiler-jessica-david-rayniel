@@ -1,0 +1,5 @@
+class Main is 
+	main (): Int is 
+		print "Hello world";
+	end;
+end;
