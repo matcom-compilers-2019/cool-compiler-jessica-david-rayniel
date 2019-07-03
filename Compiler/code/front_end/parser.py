@@ -371,7 +371,7 @@ def p_generate_instances(parse):
                        | generate_instances COMMA ID TWO_POINTS TYPE_ID ASSIGNAMENT expression
     """
 
-    if len(parse) == 5:
+    if len(parse) == 4:
         parse[0] = (our_ast.AttrNode(parse[1], parse[3]),)
 
     elif len(parse) == 6 and isinstance(parse[1], str):
@@ -431,10 +431,13 @@ def main(source_path=None,testing_mode=True):
     if not data:
         return parser
 
+from code.utils.directory import input_path
 
-p = main(r'C:\Users\David\Documents\Version del compilador de Rayniel 9 de junio\Compiler\test\test_cases\cool.cl',
-         testing_mode=False)
-raymain(p)
+def run():
+    #metodo que pone a correr todo el codigo
+    p = main(input_path,testing_mode=False)
+    raymain(p)
+
 
 
 

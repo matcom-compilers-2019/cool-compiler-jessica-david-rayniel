@@ -6,6 +6,7 @@ from code.utils.cil_scoper import CilScope
 from code.front_end.semantic_checker_utils import *
 from code.front_end import our_ast
 import code.front_end.semantic_checker as semantic_checker
+import code.front_end.semantic_checker_utils as semantic_checker_utils
 from code.back_end.cil2mips import MipsGenerator
 
 
@@ -176,9 +177,9 @@ class COOLToCILVisitor(BaseCOOLToCILVisitor):
         self.register_instruction(cil_ast.SetAttrNode(vtable_ed, instance_ed,
                                                       1, 'Main'))
         self.register_instruction(
-            cil_ast.DinamicCallNode(result, 'Main', 'main', instance,
-                                    [instance]))
-        self.register_instruction(cil_ast.ReturnNode(0))
+            cil_ast.DinamicCallNode(result, 'Main', 'main', instance_ed,
+                                    [instance_ed]))
+        self.register_instruction(cil_ast.ReturnNode(instance))
 
         self.current_function = None
 
@@ -236,7 +237,7 @@ class COOLToCILVisitor(BaseCOOLToCILVisitor):
         #print(str(self.current_type.name) + " : "+str(self.current_type.parent.name))
         #print("*************************************************************************************************************************************")
 
-        r_name = self.register_data("\"" +node.name + "\"").vname #Aqui registro el nombre de la clase y me quedo con el nombre que se el dio en la punto data para poder setiarlo
+        r_name = self.register_data("\"" + node.name + "\"").vname #Aqui registro el nombre de la clase y me quedo con el nombre que se el dio en la punto data para poder setiarlo
 
         self.register_instruction(
             cil_ast.StaticCallNode(
@@ -378,12 +379,20 @@ class COOLToCILVisitor(BaseCOOLToCILVisitor):
         temp = self.define_internal_local()
 
         if isinstance(node, our_ast.StringNode):
+
+
             data_name = self.register_data(node.value).vname
             self.register_instruction(cil_ast.LoadNode(temp, data_name))
         elif isinstance(node, our_ast.BoolNode):
-            if node.value:
+
+            if node.value == "true":
                 self.register_instruction(cil_ast.AssignNode(temp, 1))
-            else: self.register_instruction(cil_ast.AssignNode(temp, 0))
+            else:
+                self.register_instruction(cil_ast.AssignNode(temp, 0))
+
+            #if node.value:
+            #    self.register_instruction(cil_ast.AssignNode(temp, 1))
+            #else: self.register_instruction(cil_ast.AssignNode(temp, 0))
 
         elif isinstance(node, our_ast.IntegerNode):
             self.register_instruction(cil_ast.AssignNode(temp, node.value))
@@ -493,11 +502,13 @@ class COOLToCILVisitor(BaseCOOLToCILVisitor):
 
         self.while_counter += 1
 
+        self.register_instruction(cont)
         temp = self.visit(node.condition, scope)
 
         self.register_instruction(cil_ast.IfNode(temp, loop))
         self.register_instruction(cil_ast.GotoNode(endloop))
         self.register_instruction(loop)
+
 
         self.visit(node.body, scope)
 
@@ -548,9 +559,23 @@ class COOLToCILVisitor(BaseCOOLToCILVisitor):
         args_list = [expr_var] + args_list
 
         if node.expr.static in ('Int', 'Bool', 'String'):
-            self.register_instruction(
-                cil_ast.StaticCallNode(result, self.to_function_name(node.name,
-                                       node.expr.static), args_list))
+            #self.register_instruction(
+            #    cil_ast.StaticCallNode(result, self.to_function_name(node.name,
+            #                           node.expr.static), args_list))
+            if node.name == "type_name":
+                dname = self.register_data("\"" + node.expr.static + "\"").vname
+                self.register_instruction(cil_ast.LoadNode(result,dname))
+            elif node.name == "copy":
+                if node.expr.static in ('Int' , 'Bool'):
+                    self.register_instruction(cil_ast.AssignNode(result,expr_var))
+                else:
+                    self.register_instruction(cil_ast.StaticCallNode(constant, self.to_function_name('length', 'String') , [expr_var]))
+                    self.register_instruction(cil_ast.AssignNode(begin_cond,0))
+                    self.register_instruction(cil_ast.StaticCallNode(result, self.to_function_name('substr', 'String'), [expr_var , begin_cond, constant]))
+            elif node.name == "abort":
+                self.register_instruction(cil_ast.StaticCallNode(result, self.to_function_name(node.name, 'Object'), args_list))
+            else:
+                self.register_instruction(cil_ast.StaticCallNode(result, self.to_function_name(node.name, 'String'), args_list))
         else:
             self.register_instruction(cil_ast.GetAttrNode(
                 begin_cond, expr_var, 2, node.expr.static))
@@ -612,6 +637,12 @@ class COOLToCILVisitor(BaseCOOLToCILVisitor):
         var = None
         for var in node.body:
             var = self.visit(var, scope)
+
+        if var.split('_')[0] in self.type_graph.types_nodes:
+            temp = self.define_internal_local()
+            self.register_instruction(cil_ast.GetAttrNode(temp,scope.locals['self'], self.types.attrs[self.current_type.name][var.split('_')[1]], node.body[-1].static))
+            return temp
+
         temp = self.define_internal_local()
 
         self.register_instruction(cil_ast.AssignNode(temp, var))
@@ -629,18 +660,21 @@ class COOLToCILVisitor(BaseCOOLToCILVisitor):
             self.register_instruction(cil_ast.AssignNode(instance_ed, 0))
 
         elif node.type == 'String':
-            data = self.register_data('').vname
+            data = self.register_data('\"\"').vname
             self.register_instruction(cil_ast.LoadNode(instance_ed, data))
 
         else:
             type: cil_ast.TypeNode
-            attr_count = 0
-            methods_count = 0
-            for type in self.dottypes:
-                if type.tname == node.type:
-                    attr_count = len(type.attrs)
-                    methods_count = len(type.methods)
-                    break
+
+            attr_count = len(self.type_graph.types_nodes[node.type].all_attributes()) + 4 # la cantidad de atributos la tiene el classbook con el all_atributes y le sumo 4 por los 4 atributos comunes que tiene todos
+            methods_count = len(self.type_graph.types_nodes[node.type].all_methods())# la cantidad de metodos la saco con el type_grapg y el classbook correspondiente
+            #attr_count = 0
+            #methods_count = 0
+            #for type in self.dottypes:
+            #    if type.tname == node.type:
+            #        attr_count = len(type.attrs)
+            #        methods_count = len(type.methods)
+            #        break
 
             self.register_instruction(cil_ast.AllocateNode(instance, attr_count))
 
@@ -712,7 +746,7 @@ class COOLToCILVisitor(BaseCOOLToCILVisitor):
             if node.type == 'Int':
                 self.register_instruction(cil_ast.AssignNode(local, 0))
             elif node.type == 'String':
-                data = self.register_data('').vname
+                data = self.register_data('\"\"').vname
                 self.register_instruction(cil_ast.LoadNode(local, data))
             elif node.type == 'Bool':
                 self.register_instruction(cil_ast.AssignNode(local, 0))
@@ -732,11 +766,19 @@ class COOLToCILVisitor(BaseCOOLToCILVisitor):
     def visit(self, node: our_ast.IsVoidNode, scope):
         var = self.visit(node.expr, scope)
 
+
+
         begin_value = self.define_internal_local()
         temp2 = self.define_internal_local()
         const = self.define_internal_local()
 
+
+
         temp_result = self.define_internal_local()
+
+        if node.expr.static == "String" or node.expr.static == "Bool" or node.expr.static == "Int":
+            self.register_instruction(cil_ast.AssignNode(temp_result,0))
+            return temp_result
 
         self.register_instruction(cil_ast.GetAttrNode(begin_value, var, 2,
                                                       node.expr.static))
@@ -790,7 +832,7 @@ class COOLToCILVisitor(BaseCOOLToCILVisitor):
 
         node.branches.sort(key=lambda branch:
             self.type_graph.types_nodes[branch.type].deph)
-
+        node.branches.reverse()
         result = self.define_internal_local()
         cond_begin = self.define_internal_local()
 
@@ -860,6 +902,7 @@ class COOLToCILVisitor(BaseCOOLToCILVisitor):
         temp_other_index = self.register_local(VariableInfo('temp_other_index'))
         const0 = self.define_internal_local()
         const1 = self.define_internal_local()
+        substr_length = self.define_internal_local()
 
         end = cil_ast.LabelNode('end'+self.give_unic_label())
         error1 = cil_ast.LabelNode('error1'+self.give_unic_label())
@@ -869,16 +912,19 @@ class COOLToCILVisitor(BaseCOOLToCILVisitor):
         cont = cil_ast.LabelNode('continue'+self.give_unic_label())
 
         self.register_instruction(cil_ast.AssignNode(other_index, 0))
+        self.register_instruction(cil_ast.AssignNode(const0,0))
+        self.register_instruction(cil_ast.AssignNode(const1, 1))
 
         self.register_instruction(
             cil_ast.StaticCallNode(length_string,
                                    self.to_function_name('length', 'String'), [string]))
 
         self.register_instruction(cil_ast.PlusNode(second_index, index, length))
-        self.register_instruction(cil_ast.AssignNode(const0, 0))
+
+        #self.register_instruction(cil_ast.AssignNode(const0, 0))
         self.register_instruction(cil_ast.LessThanNode(cond1, index, const0))
         self.register_instruction(cil_ast.GreatherThanNode(cond2, second_index,
-                                                           length))
+                                                           length_string))
         self.register_instruction(cil_ast.IfNode(cond1, error1))
         self.register_instruction(cil_ast.GotoNode(cont1))
         self.register_instruction(error1)
@@ -889,17 +935,26 @@ class COOLToCILVisitor(BaseCOOLToCILVisitor):
         self.register_instruction(error2)
         self.register_instruction(cil_ast.ExceptNode())
         self.register_instruction(cont2)
-        self.register_instruction(cil_ast.ArrayNode(substr, length))
+
+        self.register_instruction(cil_ast.PlusNode(substr_length,length,const1))
+        self.register_instruction(cil_ast.ArrayNode(substr, substr_length))
+        self.register_instruction(cil_ast.SetIndexNode(const0,substr,length))
+
         self.register_instruction(cont)
+        self.register_instruction(cil_ast.GreatherOrEqualThanNode(cond3, index, second_index))
+        self.register_instruction(cil_ast.IfNode(cond3, end))
         self.register_instruction(cil_ast.GetIndexNode(actual_char, string, index))
         self.register_instruction(cil_ast.SetIndexNode(actual_char, substr, other_index))
-        self.register_instruction(cil_ast.GreatherOrEqualThanNode(cond3, other_index, length))
-        self.register_instruction(cil_ast.IfNode(cond3, end))
-        self.register_instruction(cil_ast.AssignNode(temp_index, index))
-        self.register_instruction(cil_ast.AssignNode(temp_other_index, other_index))
-        self.register_instruction(cil_ast.AssignNode(const1, 1))
-        self.register_instruction(cil_ast.PlusNode(other_index, temp_other_index, const1))
-        self.register_instruction(cil_ast.PlusNode(index, temp_index, const1))
+
+        #self.register_instruction(cil_ast.AssignNode(temp_index, index))
+        #self.register_instruction(cil_ast.AssignNode(temp_other_index, other_index))
+        #self.register_instruction(cil_ast.AssignNode(const1, 1))
+        self.register_instruction(cil_ast.PlusNode(temp_other_index,other_index, const1))
+        self.register_instruction(cil_ast.PlusNode(temp_index,index, const1))
+
+        self.register_instruction(cil_ast.AssignNode(index,temp_index))
+        self.register_instruction(cil_ast.AssignNode(other_index, temp_other_index))
+
         self.register_instruction(cil_ast.GotoNode(cont))
         self.register_instruction(end)
 
@@ -922,12 +977,17 @@ class COOLToCILVisitor(BaseCOOLToCILVisitor):
         temp_length = self.register_local(VariableInfo('temp_length'))
         const = self.define_internal_local()
 
+
+
         end = cil_ast.LabelNode('end'+self.give_unic_label())
         cont = cil_ast.LabelNode('continue'+self.give_unic_label())
 
+        #self.register_instruction(cil_ast.AssignNode(length, 0))
+        self.register_instruction(cil_ast.AssignNode(index, 0))
+
         self.register_instruction(cil_ast.AssignNode(length, 0))
         self.register_instruction(cont)
-        self.register_instruction(cil_ast.GetAttrNode(actual_char, string, index, 'String'))
+        self.register_instruction(cil_ast.GetIndexNode(actual_char, string, index))
         self.register_instruction(cil_ast.AssignNode(temp1, 0))
         self.register_instruction(cil_ast.EqualNode(cond, actual_char, temp1))
         self.register_instruction(cil_ast.IfNode(cond, end))
@@ -992,24 +1052,35 @@ class COOLToCILVisitor(BaseCOOLToCILVisitor):
         cond = self.register_local(VariableInfo('cond'))
         second_index = self.register_local(VariableInfo('second_index'))
         array = self.register_local(VariableInfo('array'))
+
         const0 = self.define_internal_local()
+        const1 = self.define_internal_local()
+        total_length = self.define_internal_local()
+
+        self.register_instruction(cil_ast.AssignNode(index ,0))
+        self.register_instruction(cil_ast.AssignNode(second_index, 0))
+        self.register_instruction(cil_ast.AssignNode(const0, 0))
+        self.register_instruction(cil_ast.AssignNode(const1, 1))
 
         self.register_instruction(
             cil_ast.StaticCallNode(length1, self.to_function_name('length', 'String'),
                                    [string1]))
-        self.register_instruction(cil_ast.AssignNode(index, 0))
+        #self.register_instruction(cil_ast.AssignNode(index, 0))
 
         self.register_instruction(
             cil_ast.StaticCallNode(length2, self.to_function_name('length', 'String'),
                                    [string2]))
         self.register_instruction(cil_ast.PlusNode(sum, length1, length2))
+        self.register_instruction(cil_ast.PlusNode(total_length,sum,const1))
+        self.register_instruction(cil_ast.ArrayNode(result,total_length))
+        self.register_instruction(cil_ast.SetIndexNode(const0,result,sum))
 
-        temp1 = self.define_internal_local()
-        self.register_instruction(cil_ast.AssignNode(temp1, 1))
-        self.register_instruction(cil_ast.AssignNode(const0, 0))
-        temp2 = self.define_internal_local()
-        self.register_instruction(cil_ast.PlusNode(temp2, sum, temp1))
-        self.register_instruction(cil_ast.ArrayNode(array, temp2))
+        #temp1 = self.define_internal_local()
+        #self.register_instruction(cil_ast.AssignNode(temp1, 1))
+        #self.register_instruction(cil_ast.AssignNode(const0, 0))
+        #temp2 = self.define_internal_local()
+        #self.register_instruction(cil_ast.PlusNode(temp2, sum, temp1))
+        #self.register_instruction(cil_ast.ArrayNode(array, temp2))
 
         cont = cil_ast.LabelNode('continue'+self.give_unic_label())
         end1 = cil_ast.LabelNode('end1'+self.give_unic_label())
@@ -1019,9 +1090,9 @@ class COOLToCILVisitor(BaseCOOLToCILVisitor):
         self.register_instruction(cil_ast.GetIndexNode(actual_char, string1, index))
         self.register_instruction(cil_ast.EqualNode(cond, actual_char, const0))
         self.register_instruction(cil_ast.IfNode(cond, end1))
-        self.register_instruction(cil_ast.SetAttrNode(actual_char, result, index, 'String'))
+        self.register_instruction(cil_ast.SetIndexNode(actual_char, result, index))
         self.register_instruction(cil_ast.AssignNode(temp_index, index))
-        self.register_instruction(cil_ast.PlusNode(index, temp_index, temp1))
+        self.register_instruction(cil_ast.PlusNode(index, temp_index, const1))
         self.register_instruction(cil_ast.GotoNode(cont))
         self.register_instruction(end1)
         self.register_instruction(cil_ast.GetIndexNode(actual_char, string2, second_index))
@@ -1029,12 +1100,12 @@ class COOLToCILVisitor(BaseCOOLToCILVisitor):
         self.register_instruction(cil_ast.IfNode(cond, end2))
         self.register_instruction(cil_ast.SetIndexNode(actual_char, result, index))
         self.register_instruction(cil_ast.AssignNode(temp_index, second_index))
-        self.register_instruction(cil_ast.PlusNode(second_index, temp_index, temp1))
+        self.register_instruction(cil_ast.PlusNode(second_index, temp_index, const1))
         self.register_instruction(cil_ast.AssignNode(temp_index, index))
-        self.register_instruction(cil_ast.PlusNode(index, temp_index, temp1))
+        self.register_instruction(cil_ast.PlusNode(index, temp_index, const1))
         self.register_instruction(cil_ast.GotoNode(end1))
         self.register_instruction(end2)
-        self.register_instruction(cil_ast.SetIndexNode(const0, result, index))
+        #self.register_instruction(cil_ast.SetIndexNode(const0, result, index))
 
         self.register_instruction(cil_ast.ReturnNode(result))
 
@@ -1102,6 +1173,8 @@ class COOLToCILVisitor(BaseCOOLToCILVisitor):
         self_param = self.register_param(VariableInfo('self', 'Object'))
         data = self.register_local(VariableInfo('data', 'String'))
         name = self.register_local(VariableInfo('name', 'String'))
+
+
         self.register_instruction(cil_ast.GetAttrNode(data, self_param, 0))
         self.register_instruction(cil_ast.LoadNode(name, data))
 
@@ -1138,6 +1211,7 @@ class COOLToCILVisitor(BaseCOOLToCILVisitor):
             self.to_function_name('in_string', 'IO'))
 
         instance = self.register_param(VariableInfo("self"))
+        #string = self.register_param(VariableInfo("word"))
         result = self.register_local(VariableInfo('local'))
         length = self.register_local(VariableInfo('length'))
 
@@ -1329,7 +1403,14 @@ def main(pars):
     #r'Castillo, Rayniel Ramos,  y otros\Compiler\test\test_cases\complex.cl', testing_mode=False)
     #print(pars)
     checker = semantic_checker.TypeChecker(pars)
-    checker.check()
+    try:
+        checker.check()
+    except semantic_checker.TypeError  as e:
+        e.__show__()
+        return
+    except semantic_checker_utils.SemanticAnalysisError as e:
+        e.__show__()
+        return
     visitor = COOLToCILVisitor(checker.types_graph, checker.program_node)
 
     res = visitor.result
@@ -1432,6 +1513,9 @@ def main(pars):
     mips_generator.__show__()
     mips_generator.instructions
     print(mips_generator.mains)
-    with open(r'C:\Users\David\Desktop\ourhelloworld.s', 'w') as file:
+
+    from code.utils.directory import output_path
+
+    with open(output_path, 'w') as file:
         for ins in mips_generator.instructions:
             file.write(ins + '\n')

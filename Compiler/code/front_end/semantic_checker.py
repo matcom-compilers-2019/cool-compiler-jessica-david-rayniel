@@ -26,6 +26,7 @@ class TypeChecker():
 
     def check(self):
         #Metodo que pone a correr los chequeos semanticos y de tipos, pone a correr el patron visit visitando el nodo program que va a visitar todo recursivamente.
+
         self.types_graph = TypesGraph(self.program_node)
         self.visit(self.program_node)
 

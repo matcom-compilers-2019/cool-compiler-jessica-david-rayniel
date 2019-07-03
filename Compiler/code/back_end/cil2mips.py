@@ -163,7 +163,7 @@ class MipsGenerator:
         line2 = str(node.fname) + ":"
         #print("creo los globl y demas cositas")
         #print("##########################**********************##################*********************######################*******************")
-        t_local_controler.__show__()
+        #t_local_controler.__show__()
         #print("##########################**********************##################*********************######################*******************")
         begin_lines = [lin00,line0,line1,line2]
         body_lines = []
@@ -175,6 +175,7 @@ class MipsGenerator:
             #print(body_lines)
             current_to_add = self.visit(instruc, t_local_controler)
             if current_to_add == None:
+                print("EStamos haciendo print a un current vacio, osea hay una funcion que tiene cuerpo vacio, raro revisar!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                 continue
         #        print("CAAAAAAOOOOOOOTTTIIIIIICCCOOOOOOOOOOOOO**************************!!!!!!!!!!!!!!!!!!!!!!!!!")
         #   print("el visitor me dijo que va a agregar lo sigueitne ((@($*(#*(*$")
@@ -184,7 +185,7 @@ class MipsGenerator:
         entry = False
         if node.fname == "main":
             entry = True
-        sufix_lines = t_local_controler.give_suffix_of_calling(entry) # Caso de ponerle que no haga.
+        sufix_lines = t_local_controler.give_suffix_of_calling(entry) # Caso de ponerle que no haga el jr
         #print("YA cree los fijos de los sufijos y prefijos--------------")
         if node.fname == "main":
             #Si es la primera funcion tengo que hacer exit al final
@@ -231,6 +232,15 @@ class MipsGenerator:
         #    print("despues " + str(lines))
         else:
             #si es un string significa que es una variable que esta en la pila o la memoria estatica, por lo que el load_var va a saber copiar su contenido a t0
+            if not isinstance(node.source,str):
+                print("Me estan pasando un bicho raro que seraaa!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                print(type(node.source))
+                print(node.source.__class__)
+            if not local_controler.is_local(node.source):
+                print("Me estan pasando una variable que no tengo que se llama " + str(node.source)+  " !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+                local_controler.__show__()
+                print(type(node.source))
+                print(node.source.__class__)
             lines += local_controler.load_var("$t0", node.source)
         lines += local_controler.save_var("$t0", node.destaddr) #Ya en t0 esta el valor pedido por lo que simplemente la pongo su valor en donde va.
         #print(lines)
@@ -571,15 +581,21 @@ class MipsGenerator:
     def visit(self,node, local_controler: "Local_Fp_Controler"):
         #es con las instrucciones de systema, tener en cuenta que hay que desambiguar entre la de Int, y la String, que son funciones de sistema distintas,
         lines = []
-        lines += ["move $t5, $a0"]
-        lines += ["move $t6, $a1"]
+        #lines += ["move $t5, $a0"]
+        #lines += ["move $t6, $a1"]
         lines += local_controler.load_var("$a0", node.destaddr)
         lines += ["li $a1, 1024"]
         lines += ["li $v0, 8"]
         lines += ["syscall"]
-        lines += local_controler.save_var("$a0", node.destaddr)
-        lines += ["move $a0, $t5"]
-        lines += ["move $a1, $t6"]
+        lines += ["move $t6, $a0"] # capturo en t6 el puntero al string
+        lines += ["jal function_length_at_String"]
+        lines += ["subu $a2, $v0, 1"] # lenggth -1
+        lines += ["li $a1, 0"] #index = 0
+        lines += ["move $a0, $t6"] # puntero igual al string
+        lines += ["jal function_substr_at_String"]
+        lines += local_controler.save_var("$v0", node.destaddr) # Ya aqui esta en $v0 el substring y por tanto el result
+        #lines += ["move $a0, $t5"]
+        #lines += ["move $a1, $t6"]
         return lines
 
     @visitor.when(PrintStrNode)
@@ -676,11 +692,12 @@ class MipsGenerator:
         #este caso solo se utiliza con los bools por lo que el efecto esperado es que si hay un 0 se vuelva un 1 y biceversa.
         lines = []
         lines += local_controler.load_var("$t0", node.sraddr)
-        lines += ["not $t0, $t0"]
-
-        lines +=local_controler.load_var("$t1", self.twopower31)#cargo en t1 el valor que esta en la punto data con nombre guardado en el self, que es igual a 2**31
-        lines += ["subu $t2, $t0, $t1"]#Ver que si lo niego y le resto 1111111111111111111x es como negar x. que es lo que se quiere en este caso
-        lines += local_controler.save_var("t2" , node.destaddr)
+        #lines += ["not $t0, $t0"]
+        lines += ["li $t1, 0"]
+        lines += ["seq $t2, $t1, $t0"]
+        #lines +=local_controler.load_var("$t1", self.twopower31)#cargo en t1 el valor que esta en la punto data con nombre guardado en el self, que es igual a 2**31
+        #lines += ["subu $t2, $t0, $t1"]#Ver que si lo niego y le resto 1111111111111111111x es como negar x. que es lo que se quiere en este caso
+        lines += local_controler.save_var("$t2" , node.destaddr)
         return lines
 
     @visitor.when(NegationNode)
@@ -858,7 +875,7 @@ class Local_Fp_Controler:
 
     def is_local(self,var_name):
         #metodo que devuelve si la var_name esta en el el diccionario de variables locales, osea si es local o un parametro
-        return (var_name in self.param_offset or var_name in self.local_offset)
+        return (var_name in self.param_offset or var_name in self.local_offset or var_name in self.first_for_params)
 
     def register_param(self,var_name):
         #metodo que registra para cada parametro cual es su offset en el Local para poder acceder a ella como corresponde usando el fp.
