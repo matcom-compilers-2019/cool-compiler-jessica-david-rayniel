@@ -1199,14 +1199,14 @@ jr $ra
 .globl   function_cons_at_List
 .ent     function_cons_at_List
 function_cons_at_List:
-subu $sp, $sp, 60
+subu $sp, $sp, 64
 sw $fp, 0($sp)
 sw $ra, 4($sp)
 sw $s0 8($sp)
 sw $s1 12($sp)
 sw $s2 16($sp)
 sw $s3 20($sp)
-addu $fp, $sp, 60
+addu $fp, $sp, 64
 move $s0, $a0
 move $s1, $a1
 move $s2, $a2
@@ -1216,42 +1216,42 @@ lw $a0, mips_constant_41   # nos pidieron poner la variable con nombre mips_cons
 sll $a0, $a0, 2
 li $v0, 9
 syscall
-sw $v0, 28($sp)   # nos pidieron poner la variable con nombre local_function_cons_at_List_internal_1
+sw $v0, 32($sp)   # nos pidieron poner la variable con nombre local_function_cons_at_List_internal_2
 move $a0, $t5
-lw $a0, 28($sp)   # nos pidieron poner la variable con nombre local_function_cons_at_List_internal_1
+lw $a0, 32($sp)   # nos pidieron poner la variable con nombre local_function_cons_at_List_internal_2
 jal function__attr_con_at_Cons
-sw $v0, 40($sp)   # nos pidieron poner la variable con nombre local_function_cons_at_List_internal_4
+sw $v0, 44($sp)   # nos pidieron poner la variable con nombre local_function_cons_at_List_internal_5
 move $t5, $a0
 lw $a0, mips_constant_42   # nos pidieron poner la variable con nombre mips_constant_42
 sll $a0, $a0, 2
 li $v0, 9
 syscall
-sw $v0, 32($sp)   # nos pidieron poner la variable con nombre local_function_cons_at_List_internal_2
-move $a0, $t5
-lw $a0, 32($sp)   # nos pidieron poner la variable con nombre local_function_cons_at_List_internal_2
-jal function__method_con_at_Cons
 sw $v0, 36($sp)   # nos pidieron poner la variable con nombre local_function_cons_at_List_internal_3
-lw $t0, 40($sp)   # nos pidieron poner la variable con nombre local_function_cons_at_List_internal_4
+move $a0, $t5
+lw $a0, 36($sp)   # nos pidieron poner la variable con nombre local_function_cons_at_List_internal_3
+jal function__method_con_at_Cons
+sw $v0, 40($sp)   # nos pidieron poner la variable con nombre local_function_cons_at_List_internal_4
+lw $t0, 44($sp)   # nos pidieron poner la variable con nombre local_function_cons_at_List_internal_5
 lw $t1, mips_constant_43   # nos pidieron poner la variable con nombre mips_constant_43
 sll $t1, $t1, 2
 addu $t1, $t1 , $t0
-lw $t2, 36($sp)   # nos pidieron poner la variable con nombre local_function_cons_at_List_internal_3
+lw $t2, 40($sp)   # nos pidieron poner la variable con nombre local_function_cons_at_List_internal_4
 sw  $t2, 0($t1)
-lw $t0, 40($sp)   # nos pidieron poner la variable con nombre local_function_cons_at_List_internal_4
+lw $t0, 44($sp)   # nos pidieron poner la variable con nombre local_function_cons_at_List_internal_5
 sw $t0, 24($sp)   # nos pidieron poner la variable con nombre local_function_cons_at_List_new_cell_0
 lw $t0, 24($sp)   # nos pidieron poner la variable con nombre local_function_cons_at_List_new_cell_0
 lw $t1, mips_constant_44   # nos pidieron poner la variable con nombre mips_constant_44
 sll $t1, $t1, 2
 addu $t1, $t1 , $t0
 lw $t2, 0($t1)
-sw $t2, 48($sp)   # nos pidieron poner la variable con nombre local_function_cons_at_List_internal_6
-lw $t0, mips_constant_45   # nos pidieron poner la variable con nombre mips_constant_45
-sw $t0, 56($sp)   # nos pidieron poner la variable con nombre local_function_cons_at_List_internal_8
-lw $t0, 48($sp)   # nos pidieron poner la variable con nombre local_function_cons_at_List_internal_6
-lw $t1, 56($sp)   # nos pidieron poner la variable con nombre local_function_cons_at_List_internal_8
-seq $t2, $t0, $t1
 sw $t2, 52($sp)   # nos pidieron poner la variable con nombre local_function_cons_at_List_internal_7
+lw $t0, mips_constant_45   # nos pidieron poner la variable con nombre mips_constant_45
+sw $t0, 60($sp)   # nos pidieron poner la variable con nombre local_function_cons_at_List_internal_9
 lw $t0, 52($sp)   # nos pidieron poner la variable con nombre local_function_cons_at_List_internal_7
+lw $t1, 60($sp)   # nos pidieron poner la variable con nombre local_function_cons_at_List_internal_9
+seq $t2, $t0, $t1
+sw $t2, 56($sp)   # nos pidieron poner la variable con nombre local_function_cons_at_List_internal_8
+lw $t0, 56($sp)   # nos pidieron poner la variable con nombre local_function_cons_at_List_internal_8
 bnez $t0, is_void1label_de_cil_unique19
 j end_dispatch1label_de_cil_unique20
 is_void1label_de_cil_unique19:
@@ -1270,15 +1270,15 @@ lw $t0, 24($sp)   # nos pidieron poner la variable con nombre local_function_con
 lw $t1, 4($t0)
 lw $t2,64($t1)
 jalr $t2
-sw $v0, 44($sp)   # nos pidieron poner la variable con nombre local_function_cons_at_List_internal_5
-lw $v0, 44($sp)   # nos pidieron poner la variable con nombre local_function_cons_at_List_internal_5
+sw $v0, 48($sp)   # nos pidieron poner la variable con nombre local_function_cons_at_List_internal_6
+lw $v0, 48($sp)   # nos pidieron poner la variable con nombre local_function_cons_at_List_internal_6
 lw $fp, 0($sp)
 lw $ra, 4($sp)
 lw $s0 8($sp)
 lw $s1 12($sp)
 lw $s2 16($sp)
 lw $s3 20($sp)
-addu $sp, $sp, 60
+addu $sp, $sp, 64
 jr $ra
 .end function_cons_at_List
     
@@ -1541,14 +1541,14 @@ jr $ra
 .globl   function__attr_con_at_Cons
 .ent     function__attr_con_at_Cons
 function__attr_con_at_Cons:
-subu $sp, $sp, 52
+subu $sp, $sp, 56
 sw $fp, 0($sp)
 sw $ra, 4($sp)
 sw $s0 8($sp)
 sw $s1 12($sp)
 sw $s2 16($sp)
 sw $s3 20($sp)
-addu $fp, $sp, 52
+addu $fp, $sp, 56
 move $s0, $a0
 move $s1, $a1
 move $s2, $a2
@@ -1571,21 +1571,21 @@ lw $a0, mips_constant_52   # nos pidieron poner la variable con nombre mips_cons
 sll $a0, $a0, 2
 li $v0, 9
 syscall
-sw $v0, 44($sp)   # nos pidieron poner la variable con nombre local_function__attr_con_at_Cons_xcdr_5
+sw $v0, 48($sp)   # nos pidieron poner la variable con nombre local_function__attr_con_at_Cons_xcdr_6
 move $a0, $t5
 lw $t0, mips_constant_53   # nos pidieron poner la variable con nombre mips_constant_53
-sw $t0, 48($sp)   # nos pidieron poner la variable con nombre local_function__attr_con_at_Cons_internal_6
-lw $t0, 44($sp)   # nos pidieron poner la variable con nombre local_function__attr_con_at_Cons_xcdr_5
+sw $t0, 52($sp)   # nos pidieron poner la variable con nombre local_function__attr_con_at_Cons_internal_7
+lw $t0, 48($sp)   # nos pidieron poner la variable con nombre local_function__attr_con_at_Cons_xcdr_6
 lw $t1, mips_constant_54   # nos pidieron poner la variable con nombre mips_constant_54
 sll $t1, $t1, 2
 addu $t1, $t1 , $t0
-lw $t2, 48($sp)   # nos pidieron poner la variable con nombre local_function__attr_con_at_Cons_internal_6
+lw $t2, 52($sp)   # nos pidieron poner la variable con nombre local_function__attr_con_at_Cons_internal_7
 sw  $t2, 0($t1)
 move $t0, $s0   # nos pidieron poner la variable con nombre param_function__attr_con_at_Cons_self_0
 lw $t1, mips_constant_55   # nos pidieron poner la variable con nombre mips_constant_55
 sll $t1, $t1, 2
 addu $t1, $t1 , $t0
-lw $t2, 44($sp)   # nos pidieron poner la variable con nombre local_function__attr_con_at_Cons_xcdr_5
+lw $t2, 48($sp)   # nos pidieron poner la variable con nombre local_function__attr_con_at_Cons_xcdr_6
 sw  $t2, 0($t1)
 lw $t0, mips_constant_56   # nos pidieron poner la variable con nombre mips_constant_56
 sw $t0, 28($sp)   # nos pidieron poner la variable con nombre local_function__attr_con_at_Cons_begin_1
@@ -1616,7 +1616,7 @@ lw $s0 8($sp)
 lw $s1 12($sp)
 lw $s2 16($sp)
 lw $s3 20($sp)
-addu $sp, $sp, 52
+addu $sp, $sp, 56
 jr $ra
 .end function__attr_con_at_Cons
     
@@ -2926,14 +2926,14 @@ jr $ra
 .globl   function_iota_at_Main
 .ent     function_iota_at_Main
 function_iota_at_Main:
-subu $sp, $sp, 116
+subu $sp, $sp, 120
 sw $fp, 0($sp)
 sw $ra, 4($sp)
 sw $s0 8($sp)
 sw $s1 12($sp)
 sw $s2 16($sp)
 sw $s3 20($sp)
-addu $fp, $sp, 116
+addu $fp, $sp, 120
 move $s0, $a0
 move $s1, $a1
 move $s2, $a2
@@ -2971,15 +2971,15 @@ addu $t1, $t1 , $t0
 lw $t2, 36($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_3
 sw  $t2, 0($t1)
 lw $t0, mips_constant_131   # nos pidieron poner la variable con nombre mips_constant_131
-sw $t0, 44($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_5
-lw $t0, 44($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_5
+sw $t0, 48($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_6
+lw $t0, 48($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_6
 sw $t0, 40($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_j_4
 continue_0label_de_cil_unique45:
 lw $t0, 40($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_j_4
 move $t1, $s1   # nos pidieron poner la variable con nombre param_function_iota_at_Main_i_1
 slt $t2, $t0, $t1
-sw $t2, 48($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_6
-lw $t0, 48($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_6
+sw $t2, 52($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_7
+lw $t0, 52($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_7
 bnez $t0, loop_0label_de_cil_unique46
 j endloop_0label_de_cil_unique47
 loop_0label_de_cil_unique46:
@@ -2988,46 +2988,46 @@ lw $t1, mips_constant_132   # nos pidieron poner la variable con nombre mips_con
 sll $t1, $t1, 2
 addu $t1, $t1 , $t0
 lw $t2, 0($t1)
-sw $t2, 68($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_11
+sw $t2, 72($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_12
 move $t5, $a0
 lw $a0, mips_constant_133   # nos pidieron poner la variable con nombre mips_constant_133
-sll $a0, $a0, 2
-li $v0, 9
-syscall
-sw $v0, 72($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_12
-move $a0, $t5
-lw $a0, 72($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_12
-jal function__attr_con_at_Cons
-sw $v0, 84($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_15
-move $t5, $a0
-lw $a0, mips_constant_134   # nos pidieron poner la variable con nombre mips_constant_134
 sll $a0, $a0, 2
 li $v0, 9
 syscall
 sw $v0, 76($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_13
 move $a0, $t5
 lw $a0, 76($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_13
-jal function__method_con_at_Cons
+jal function__attr_con_at_Cons
+sw $v0, 88($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_16
+move $t5, $a0
+lw $a0, mips_constant_134   # nos pidieron poner la variable con nombre mips_constant_134
+sll $a0, $a0, 2
+li $v0, 9
+syscall
 sw $v0, 80($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_14
-lw $t0, 84($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_15
+move $a0, $t5
+lw $a0, 80($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_14
+jal function__method_con_at_Cons
+sw $v0, 84($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_15
+lw $t0, 88($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_16
 lw $t1, mips_constant_135   # nos pidieron poner la variable con nombre mips_constant_135
 sll $t1, $t1, 2
 addu $t1, $t1 , $t0
-lw $t2, 80($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_14
+lw $t2, 84($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_15
 sw  $t2, 0($t1)
-lw $t0, 84($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_15
+lw $t0, 88($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_16
 lw $t1, mips_constant_136   # nos pidieron poner la variable con nombre mips_constant_136
 sll $t1, $t1, 2
 addu $t1, $t1 , $t0
 lw $t2, 0($t1)
-sw $t2, 56($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_8
-lw $t0, mips_constant_137   # nos pidieron poner la variable con nombre mips_constant_137
-sw $t0, 64($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_10
-lw $t0, 56($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_8
-lw $t1, 64($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_10
-seq $t2, $t0, $t1
 sw $t2, 60($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_9
+lw $t0, mips_constant_137   # nos pidieron poner la variable con nombre mips_constant_137
+sw $t0, 68($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_11
 lw $t0, 60($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_9
+lw $t1, 68($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_11
+seq $t2, $t0, $t1
+sw $t2, 64($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_10
+lw $t0, 64($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_10
 bnez $t0, is_void13label_de_cil_unique48
 j end_dispatch13label_de_cil_unique49
 is_void13label_de_cil_unique48:
@@ -3039,30 +3039,30 @@ move $a0, $t5
 li $v0 , 10
 syscall
 end_dispatch13label_de_cil_unique49:
-lw $a0, 84($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_15
+lw $a0, 88($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_16
 lw $a1, 40($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_j_4
-lw $a2, 68($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_11
-lw $t0, 84($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_15
+lw $a2, 72($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_12
+lw $t0, 88($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_16
 lw $t1, 4($t0)
 lw $t2,64($t1)
 jalr $t2
-sw $v0, 52($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_7
+sw $v0, 56($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_8
 move $t0, $s0   # nos pidieron poner la variable con nombre param_function_iota_at_Main_self_0
 lw $t1, mips_constant_138   # nos pidieron poner la variable con nombre mips_constant_138
 sll $t1, $t1, 2
 addu $t1, $t1 , $t0
-lw $t2, 52($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_7
+lw $t2, 56($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_8
 sw  $t2, 0($t1)
 lw $t0, mips_constant_139   # nos pidieron poner la variable con nombre mips_constant_139
-sw $t0, 88($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_16
+sw $t0, 92($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_17
 lw $t0, 40($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_j_4
-lw $t1, 88($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_16
+lw $t1, 92($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_17
 addu $t2, $t0, $t1
-sw $t2, 92($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_17
-lw $t0, 92($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_17
+sw $t2, 96($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_18
+lw $t0, 96($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_18
 sw $t0, 40($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_j_4
 lw $t0, 40($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_j_4
-sw $t0, 96($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_18
+sw $t0, 100($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_19
 j continue_0label_de_cil_unique45
 endloop_0label_de_cil_unique47:
 move $t5, $a0
@@ -3070,32 +3070,32 @@ lw $a0, mips_constant_140   # nos pidieron poner la variable con nombre mips_con
 sll $a0, $a0, 2
 li $v0, 9
 syscall
-sw $v0, 100($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_19
+sw $v0, 104($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_20
 move $a0, $t5
 lw $t0, mips_constant_141   # nos pidieron poner la variable con nombre mips_constant_141
-sw $t0, 104($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_20
-lw $t0, 100($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_19
+sw $t0, 108($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_21
+lw $t0, 104($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_20
 lw $t1, mips_constant_142   # nos pidieron poner la variable con nombre mips_constant_142
 sll $t1, $t1, 2
 addu $t1, $t1 , $t0
-lw $t2, 104($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_20
+lw $t2, 108($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_21
 sw  $t2, 0($t1)
 move $t0, $s0   # nos pidieron poner la variable con nombre param_function_iota_at_Main_self_0
 lw $t1, mips_constant_143   # nos pidieron poner la variable con nombre mips_constant_143
 sll $t1, $t1, 2
 addu $t1, $t1 , $t0
 lw $t2, 0($t1)
-sw $t2, 108($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_21
-lw $t0, 108($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_21
-sw $t0, 112($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_22
-lw $v0, 112($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_22
+sw $t2, 112($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_22
+lw $t0, 112($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_22
+sw $t0, 116($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_23
+lw $v0, 116($sp)   # nos pidieron poner la variable con nombre local_function_iota_at_Main_internal_23
 lw $fp, 0($sp)
 lw $ra, 4($sp)
 lw $s0 8($sp)
 lw $s1 12($sp)
 lw $s2 16($sp)
 lw $s3 20($sp)
-addu $sp, $sp, 116
+addu $sp, $sp, 120
 jr $ra
 .end function_iota_at_Main
     

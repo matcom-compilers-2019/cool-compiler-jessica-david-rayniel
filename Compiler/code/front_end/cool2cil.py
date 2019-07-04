@@ -340,13 +340,15 @@ class COOLToCILVisitor(BaseCOOLToCILVisitor):
         # Your code here!!!
         value: str = self.visit(node.value, scope)
         # se verifican que sean attr de la clase para usar otras instrucciones
+
+        #value.split('_')[1]
         if value.split('_')[0] in self.type_graph.types_nodes.keys():
             if scope.locals[node.name].split('_')[0] in \
                     self.type_graph.types_nodes.keys():
                 temp = self.define_internal_local()
                 self.register_instruction(
                     cil_ast.GetAttrNode(temp, scope.locals['self'],
-                            self.types.attrs[self.current_type.name][value.split('_')[1]],
+                            self.types.attrs[self.current_type.name]['_'.join(value.split('_')[1:])],
                                         node.value.static))
                 self.register_instruction(
                     cil_ast.SetAttrNode(temp, scope.locals['self'],
@@ -355,7 +357,7 @@ class COOLToCILVisitor(BaseCOOLToCILVisitor):
             else:
                 self.register_instruction(
                     cil_ast.GetAttrNode(scope.locals[node.name], scope.locals['self'],
-                        self.types.attrs[self.current_type.name][value.split('_')[1]],
+                        self.types.attrs[self.current_type.name]['_'.join(value.split('_')[1:])],
                                         node.value.static))
         else:
             if scope.locals[node.name].split('_')[0] in \
@@ -481,13 +483,27 @@ class COOLToCILVisitor(BaseCOOLToCILVisitor):
         self.register_instruction(cil_ast.IfNode(cond_var, after))
 
         fbody_value = self.visit(node.false_body, scope)
-        self.register_instruction(cil_ast.AssignNode(result, fbody_value))
+        #agregado
+        if fbody_value.split('_')[0] in self.type_graph.types_nodes:
+            self.register_instruction(cil_ast.GetAttrNode(result, scope.locals['self'], self.types.attrs[self.current_type.name]['_'.join(fbody_value.split('_')[1:])], node.false_body.static))
+        else:
+            self.register_instruction(cil_ast.AssignNode(result,fbody_value))
+
+
+        #self.register_instruction(cil_ast.AssignNode(result, fbody_value))
 
         self.register_instruction(cil_ast.GotoNode(endif))
         self.register_instruction(after)
 
         tbody_value = self.visit(node.true_body, scope)
-        self.register_instruction(cil_ast.AssignNode(result, tbody_value))
+
+        #Otro agregado
+        if tbody_value.split('_')[0] in self.type_graph.types_nodes:
+            self.register_instruction(cil_ast.GetAttrNode(result,scope.locals['self'], self.types.attrs[self.current_type.name]['_'.join(tbody_value.split('_')[1:])], node.true_body.static))
+        else:
+            self.register_instruction(cil_ast.AssignNode(result, tbody_value))
+
+        #self.register_instruction(cil_ast.AssignNode(result, tbody_value))
 
         self.register_instruction(endif)
 
@@ -637,10 +653,10 @@ class COOLToCILVisitor(BaseCOOLToCILVisitor):
         var = None
         for var in node.body:
             var = self.visit(var, scope)
-
+        #var.split('_')[1]
         if var.split('_')[0] in self.type_graph.types_nodes:
             temp = self.define_internal_local()
-            self.register_instruction(cil_ast.GetAttrNode(temp,scope.locals['self'], self.types.attrs[self.current_type.name][var.split('_')[1]], node.body[-1].static))
+            self.register_instruction(cil_ast.GetAttrNode(temp,scope.locals['self'], self.types.attrs[self.current_type.name]['_'.join(var.split('_')[1:])], node.body[-1].static))
             return temp
 
         temp = self.define_internal_local()
@@ -741,7 +757,7 @@ class COOLToCILVisitor(BaseCOOLToCILVisitor):
     @visitor.when(our_ast.AttrNode)
     def visit(self, node: our_ast.AttrNode, scope: CilScope):
         local = self.register_local(VariableInfo(node.name, node.type))
-
+        const = self.define_internal_local()
         if not node.value:
             if node.type == 'Int':
                 self.register_instruction(cil_ast.AssignNode(local, 0))
@@ -751,15 +767,15 @@ class COOLToCILVisitor(BaseCOOLToCILVisitor):
             elif node.type == 'Bool':
                 self.register_instruction(cil_ast.AssignNode(local, 0))
             else:
-                const = self.define_internal_local()
+
                 self.register_instruction(cil_ast.AllocateNode(local, 4))
                 self.register_instruction(cil_ast.AssignNode(const, 0))
                 self.register_instruction(cil_ast.SetAttrNode(const, local, 2))
         else:
             var = self.visit(node.value, scope)
-            scope.define_variable(node.name, local)
-            self.register_instruction(cil_ast.AssignNode(local, var))
 
+            self.register_instruction(cil_ast.AssignNode(local, var))
+        scope.define_variable(node.name, local)
         return local
 
     @visitor.when(our_ast.IsVoidNode)

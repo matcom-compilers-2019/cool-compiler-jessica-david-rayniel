@@ -1,8 +1,8 @@
 #Este modulo contiene los path de input y output, el de input es el path del archivo de cool que se va a compilar y el outut es el nombre del archivo de mips
 #donde se va a guardar el resultado de compilar el input.
 
-input_path = r'C:\Users\David\Documents\Version del compilador de Rayniel 9 de junio\Compiler\input\complex.cl'
-output_path = r'C:\Users\David\Documents\Version del compilador de Rayniel 9 de junio\Compiler\output\complex.s'
+input_path = r'C:\Users\David\Documents\Version del compilador de Rayniel 9 de junio\Compiler\input\life.cl'
+output_path = r'C:\Users\David\Documents\Version del compilador de Rayniel 9 de junio\Compiler\output\life1.s'
 
 
 
